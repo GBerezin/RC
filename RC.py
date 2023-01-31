@@ -12,9 +12,9 @@ import os
 import time
 
 QApplication.setAttribute(
-    QtCore.Qt.AA_EnableHighDpiScaling, True)  # enable highdpi scaling
+    QtCore.Qt.AA_EnableHighDpiScaling, True)  # enable high-dpi scaling
 QApplication.setAttribute(
-    QtCore.Qt.AA_UseHighDpiPixmaps, True)  # use highdpi icons
+    QtCore.Qt.AA_UseHighDpiPixmaps, True)  # use high-dpi icons
 
 
 class RC(QWidget):
