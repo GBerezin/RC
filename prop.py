@@ -12,7 +12,9 @@ class Properties:
     epsbt2 = 0.00015
 
     @staticmethod
-    def sigma(e, e_2, e_0, e_1, e1, e0, e2, S_1, S1, Rc, Rt, E):
+    def sigma(e, e_2, e_0, e_1, e1, e0, e2, S_1, S1, Rc, Rt, E, kRb):
+        Rc = Rc * kRb
+        S_1 = S_1 * kRb
         if e_0 >= e >= e_2:
             S = Rc
         elif e_0 < e < e_1:
@@ -102,8 +104,10 @@ class Properties:
 
 class Sigma:
     @staticmethod
-    def sigma(e, e_2, e_0, e_1, e1, e0, e2, S_1, S1, Rc, Rt, E):
-        if e_0 >= e >= e_2:
+    def sigma(e, e_2, e_0, e_1, e1, e0, e2, S_1, S1, Rc, Rt, E, kRb):
+        Rc = Rc * kRb
+        S_1 = S_1 * kRb
+        if e_0 >= e:
             S = Rc
         elif e_0 < e < e_1:
             S = ((1 - S_1 / Rc) * (e - e_1)/(e_0 - e_1) + S_1/Rc)*Rc
@@ -113,7 +117,7 @@ class Sigma:
             S = E * e
         elif e1 < e < e0 and Rt != 0.0:
             S = ((1 - S1 / Rt) * (e - e1)/(e0 - e1) + S1 / Rt) * Rt
-        elif e0 <= e <= e2:
+        elif e0 <= e:
             S = Rt
         else:
             S = 0.0

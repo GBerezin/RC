@@ -104,7 +104,7 @@ class Calc:
         self.e = (self.stfs.Z).dot(u+self.u_stg1)
         self.S = self.stfs.vsigma(self.e, self.prpr.e_2, self.prpr.e_0, self.prpr.e_1,
                                   self.prpr.e1, self.prpr.e0, self.prpr.e2, self.prpr.S_1, self.prpr.S1,
-                                  self.prpr.Rc, self.prpr.Rt, self.prpr.E)
+                                  self.prpr.Rc, self.prpr.Rt, self.prpr.E, 1)
         return u
 
 

@@ -133,4 +133,4 @@ Convergence is reached !
 Mx   320.0   319.998  0.007612
 My   140.0   139.998  0.006311
 N  -1500.0 -1499.992 -0.000240
-Job time: 0.0365 seconds
+Job time: 0.038 seconds

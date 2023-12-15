@@ -167,12 +167,12 @@ class Calc:
         orientation = 0.5 * np.arctan2(gxy, ee2)
         kRb = np.ones(K)
         for i in range(0, K):
-            if eps1[i] > 0.002:
+            if eps1[i] > 0.002 and eps2[i] < 0:
                 kRb[i] = 1.0 / (0.8 + 100 * eps1[i])
             else:
                 kRb[i] = 1.0
-        Sb = np.vstack((self.stfs.vsigma(eps1, self.prpr.ce_2, self.prpr.ce_0, self.prpr.ce_1, self.prpr.ce1, self.prpr.ce0, self.prpr.ce2, self.prpr.cS_1, self.prpr.cS1, self.prpr.cRc*kRb, self.prpr.cRt, self.prpr.cE),
-                        self.stfs.vsigma(eps2, self.prpr.ce_2, self.prpr.ce_0, self.prpr.ce_1, self.prpr.ce1, self.prpr.ce0, self.prpr.ce2, self.prpr.cS_1, self.prpr.cS1, self.prpr.cRc*kRb, self.prpr.cRt, self.prpr.cE))).transpose().reshape(K, 2, 1)
+        Sb = np.vstack((self.stfs.vsigma(eps1, self.prpr.ce_2, self.prpr.ce_0, self.prpr.ce_1, self.prpr.ce1, self.prpr.ce0, self.prpr.ce2, self.prpr.cS_1, self.prpr.cS1, self.prpr.cRc*kRb, self.prpr.cRt, self.prpr.cE, 1),
+                        self.stfs.vsigma(eps2, self.prpr.ce_2, self.prpr.ce_0, self.prpr.ce_1, self.prpr.ce1, self.prpr.ce0, self.prpr.ce2, self.prpr.cS_1, self.prpr.cS1, self.prpr.cRc*kRb, self.prpr.cRt, self.prpr.cE, kRb[i]))).transpose().reshape(K, 2, 1)
         vb = self.v_b(K, Sb, eps1, eps2)
         Sxyb = self.sxyb(K, orientation, Sb)
         return vb, Sb, Sxyb, orientation, eps1, eps2
@@ -210,7 +210,7 @@ class Calc:
             dc = np.array([c[i] ** 2, s[i] ** 2, 2 * s[i] * c[i]])
             strain[i] = dc @ epss[i]
         stress = self.stfs.vsigma(
-            strain, self.prpr.re_2, self.prpr.re_0, self.prpr.re_1, self.prpr.re1, self.prpr.re0, self.prpr.re2, self.prpr.rS_1, self.prpr.rS1, self.prpr.rRc, self.prpr.rRt, self.prpr.rE)
+            strain, self.prpr.re_2, self.prpr.re_0, self.prpr.re_1, self.prpr.re1, self.prpr.re0, self.prpr.re2, self.prpr.rS_1, self.prpr.rS1, self.prpr.rRc, self.prpr.rRt, self.prpr.rE, 1)
         vs = self.v_s(ns, strain, stress)
         Sxys = self.sxys(ns, c, s, stress)
         return vs, Sxys, strain, stress
