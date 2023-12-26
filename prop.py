@@ -3,6 +3,7 @@ import pandas as pd
 import os
 dpath = os.path.join('.', 'data')
 tpath = os.path.join('.', 'test')
+rpath = os.path.join('.', 'results')
 
 
 class Properties:
@@ -33,6 +34,7 @@ class Properties:
 
     def prp(self, dat_file):
         self.dpath = dpath
+        self.rpath = rpath
         self.mat = pd.read_csv('materials.csv', sep=';')
         self.dat = pd.read_csv(dat_file, sep=';')
         if self.lim_st == '1_st':
@@ -104,9 +106,7 @@ class Properties:
 
 class Sigma:
     @staticmethod
-    def sigma(e, e_2, e_0, e_1, e1, e0, e2, S_1, S1, Rc, Rt, E, kRb):
-        Rc = Rc * kRb
-        S_1 = S_1 * kRb
+    def sigma(e, e_2, e_0, e_1, e1, e0, e2, S_1, S1, Rc, Rt, E):
         if e_0 >= e:
             S = Rc
         elif e_0 < e < e_1:

@@ -6,7 +6,6 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 from scipy import spatial as sp_spatial
 import mpl_toolkits.mplot3d as a3
 
-
 class Plots:
     @staticmethod
     def strainstress(stfs, prpr, mat):
@@ -14,7 +13,7 @@ class Plots:
         x = [prpr.e_2[i], prpr.e_0[i], prpr.e_1[i],
              0.0, prpr.e1[i], prpr.e0[i], prpr.e2[i]]
         y = stfs.vsigma(x, prpr.e_2[i], prpr.e_0[i], prpr.e_1[i], prpr.e1[i], prpr.e0[i],
-                        prpr.e2[i], prpr.S_1[i], prpr.S1[i], prpr.Rc[i], prpr.Rt[i], prpr.E[i])
+                        prpr.e2[i], prpr.S_1[i], prpr.S1[i], prpr.Rc[i], prpr.Rt[i], prpr.E[i], 1)
         fig, ax = plt.subplots(num=mat, dpi=150)
         ax.plot(x, y)
         ax.set_xlabel('Strain')
@@ -30,26 +29,29 @@ class Plots:
 
     @staticmethod
     def f_strain(rsl, stfs):
-        xc = rsl.result1.Zx[stfs.prpr.pr['T'] == 'concrete'].values
-        yc = rsl.result1.Zy[stfs.prpr.pr['T'] == 'concrete'].values
-        zc = rsl.result1.Strain[stfs.prpr.pr['T'] == 'concrete'].values
+        xc = rsl.result1.Zx[stfs.prpr.pr['T'] == 'concrete']
+        yc = rsl.result1.Zy[stfs.prpr.pr['T'] == 'concrete']
+        zc = rsl.result1.Strain[stfs.prpr.pr['T'] == 'concrete']
         epsmin = min(zc)
         x_min = np.array(xc[zc == epsmin][:1])[0]
         y_min = np.array(yc[zc == epsmin][:1])[0]
         x1 = np.linspace(xc.min(), xc.max(), len(xc))
         y1 = np.linspace(yc.min(), yc.max(), len(yc))
         x2, y2 = np.meshgrid(x1, y1)
-        fig, ax = plt.subplots(num='Strain', dpi=150)
+        z2 = griddata((xc, yc), zc, (x1[None, :], y1[:, None]), method='linear')
+        fig, ax = plt.subplots()
         ax.set_xlabel('Zbx')
         ax.set_ylabel('Zby')
+        ax.set_aspect('equal')
         plt.subplots_adjust(left=0.185, right=0.815, bottom=0.1, top=0.9)
         plt.title('Strain')
+        cont = ax.contourf(x2, y2, z2, 20, alpha=0.6, cmap="rainbow")
         xr = rsl.result1.Zx[stfs.prpr.pr['T'] == 'rebar'].values
         yr = rsl.result1.Zy[stfs.prpr.pr['T'] == 'rebar'].values
         zr = rsl.result1.Strain[stfs.prpr.pr['T'] == 'rebar'].values
         As = stfs.A[stfs.prpr.pr['T'] == 'rebar']
         ds = np.sqrt(4*As/np.pi)
-        ax.scatter(xr, yr, s=ds * 8000, c='red', alpha=0.5)
+        ax.scatter(xr, yr, s=ds * 8000, c='green', alpha=0.5)
         ax.scatter(x_min, y_min, s=500, c='white')
         ax.annotate(round(epsmin, 5), (x_min, y_min), size=10, xytext=(
             0, 10), ha='right', color='red', textcoords='offset points')
@@ -57,7 +59,7 @@ class Plots:
             ax.annotate(round(txt, 5), (xr[i], yr[i]), size=10, xytext=(
                 0, 0), ha='left', textcoords='offset points')
         plt.show()
-
+        
     @staticmethod
     def f_stress(rsl, stfs):
         xc = rsl.result1.Zx[stfs.prpr.pr['T'] == 'concrete'].values
@@ -69,17 +71,20 @@ class Plots:
         x1 = np.linspace(xc.min(), xc.max(), len(xc))
         y1 = np.linspace(yc.min(), yc.max(), len(yc))
         x2, y2 = np.meshgrid(x1, y1)
-        fig, ax = plt.subplots(num='Stress', dpi=150)
+        z2 = griddata((xc, yc), zc, (x1[None, :], y1[:, None]), method='linear')
+        fig, ax = plt.subplots()
         ax.set_xlabel('Zbx')
         ax.set_ylabel('Zby')
+        ax.set_aspect('equal')
         plt.subplots_adjust(left=0.185, right=0.815, bottom=0.1, top=0.9)
         plt.title('Stress, MPa')
+        cont = ax.contourf(x2, y2, z2, 20, alpha=0.6, cmap="rainbow")
         xr = rsl.result1.Zx[stfs.prpr.pr['T'] == 'rebar'].values
         yr = rsl.result1.Zy[stfs.prpr.pr['T'] == 'rebar'].values
         zr = rsl.result1.Stress[rsl.stfs.prpr.pr['T'] == 'rebar'].values
         As = stfs.A[stfs.prpr.pr['T'] == 'rebar']
         ds = np.sqrt(4*As/np.pi)
-        ax.scatter(xr, yr, s=ds * 8000, c='red', alpha=0.5)
+        ax.scatter(xr, yr, s=ds * 8000, c='green', alpha=0.5)
         ax.scatter(x_min, y_min, s=500, c='white')
         ax.annotate(round(stressmin, 2), (x_min, y_min), size=10, xytext=(
             0, 10), ha='right', color='red', textcoords='offset points')
@@ -166,7 +171,6 @@ class Plots:
 
     @staticmethod
     def sc_strain(rsl, stfs):
-        #fig = plt.figure(num='Strain', dpi=150)
         ax = plt.gca()
         df = rsl.result1[stfs.prpr.pr['T'] == 'concrete']
         df.plot(kind='line', x='Z', y='Strain1', color='green', ax=ax)
@@ -178,17 +182,11 @@ class Plots:
 
     @staticmethod
     def sc_stress(rsl, stfs):
-        #fig = plt.figure(num='Stress', dpi=150)
+        fig = plt.figure()
         ax = plt.gca()
         df = rsl.result1[stfs.prpr.pr['T'] == 'concrete']
         df.plot(kind='line', x='Z', y='Stress1', color='green', ax=ax)
         df.plot(kind='line', x='Z', y='Stress2', color='red', ax=ax)
-        Z = rsl.result1.Z[stfs.prpr.pr['T'] == 'rebar'].values
-        rstress = rsl.result1.Stress1[stfs.prpr.pr['T'] == 'rebar']
-        ax.scatter(Z, np.zeros(len(Z)), s=50, c='green', alpha=0.5)
-        for i, txt in enumerate(rstress):
-            ax.annotate(round(txt, 2), (Z[i], 0.0), rotation=90, size=10, xytext=(
-                0, 0), va='top', textcoords='offset points')
         plt.title('Stress, MPa')
         ax.set_xlabel('Z, m')
         ax.set_ylabel('Stress, MPa')

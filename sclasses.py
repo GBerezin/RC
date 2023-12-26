@@ -27,7 +27,7 @@ class Iteration:
     def itrn(self, Fg, iF):
         vb = np.ones((self.stfs.K, 2))
         vs = np.ones((self.stfs.ns))
-        D = self.stfs.d(self.stfs.E_b, vb, self.stfs.E_s, vs, self.stfs.orientation)
+        D, v01, v10 = self.stfs.d(self.stfs.E_b, vb, self.stfs.E_s, vs, self.stfs.orientation)
         vb, Sb, Sxyb, orientation, eps1, eps2, vs, Sxys, strain, stress, u = self.clc.calc(D, Fg)
         i = 0
         du = 0.1
@@ -41,7 +41,7 @@ class Iteration:
                 self.resmes = 'Convergence L/C ' + str(iF) + ' did not reached!!!'
                 print(self.resmes)
                 break
-            D = self.stfs.d(
+            D, self.v01, self.v10 = self.stfs.d(
                 self.stfs.E_b, vb, self.stfs.E_s, vs, orientation)
             vb, Sb, Sxyb, orientation, eps1, eps2, vs, Sxys, strain, stress, u_f = self.clc.calc(
                 D, Fg)
@@ -91,24 +91,24 @@ class Stiffness:
             self.pls[i, :, :] = np.hstack((pl1, pl2))
         self.vsigma = np.vectorize(self.prpr.sigma)
 
-    def cQb(self, E_b):
+    def cQb(self, E_b_):
         Qb = np.zeros((self.K, 3, 3))
         G01 = np.zeros(self.K)
         self.v10 = np.zeros(self.K)
         for i in range(0, self.K):
-            if E_b[i, 0] != 0.0:
-                self.v10[i] = E_b[i, 1]*self.v01[i]/E_b[i, 0]
+            if E_b_[i, 0] != 0.0:
+                self.v10[i] = E_b_[i, 1]*self.v01[i]/E_b_[i, 0]
             else:
                 self.v10[i] = 0.0
             G01[i] = self.E_b[i, 0]/(2*(1+self.v10[i]))
         self.v01 = self.v10
         v = 1-self.v01*self.v10
-        Qb[:, 0, 0] = E_b[:, 0]/v
-        Qb[:, 0, 1] = self.v01*E_b[:, 1]/v
-        Qb[:, 1, 1] = E_b[:, 1]/v
-        Qb[:, 1, 0] = self.v10*E_b[:, 1]/v
+        Qb[:, 0, 0] = E_b_[:, 0]/v
+        Qb[:, 0, 1] = self.v01*E_b_[:, 1]/v
+        Qb[:, 1, 1] = E_b_[:, 1]/v
+        Qb[:, 1, 0] = self.v10*E_b_[:, 1]/v
         Qb[:, 2, 2] = G01
-        return Qb
+        return Qb, self.v01, self.v10
 
     def cT(self, a):
         n = len(a)
@@ -134,7 +134,7 @@ class Stiffness:
         return Di
 
     def d(self, E_b, vb, E_s, vs, orientation):
-        Qb = self.cQb(E_b*vb)
+        Qb, v01, v10 = self.cQb(E_b*vb)
         T = self.cT(orientation)
         Db = self.cD(self.t, self.Zb, T, Qb)
         Qs = np.zeros((self.ns, 3, 3))
@@ -142,7 +142,7 @@ class Stiffness:
         T = self.cT(self.alpha)
         Ds = self.cD(self.As, self.Zs, T, Qs)
         D = Db+Ds
-        return D
+        return D, v01, v10
 
 
 class Calc:
@@ -172,7 +172,7 @@ class Calc:
             else:
                 kRb[i] = 1.0
         Sb = np.vstack((self.stfs.vsigma(eps1, self.prpr.ce_2, self.prpr.ce_0, self.prpr.ce_1, self.prpr.ce1, self.prpr.ce0, self.prpr.ce2, self.prpr.cS_1, self.prpr.cS1, self.prpr.cRc*kRb, self.prpr.cRt, self.prpr.cE, 1),
-                        self.stfs.vsigma(eps2, self.prpr.ce_2, self.prpr.ce_0, self.prpr.ce_1, self.prpr.ce1, self.prpr.ce0, self.prpr.ce2, self.prpr.cS_1, self.prpr.cS1, self.prpr.cRc*kRb, self.prpr.cRt, self.prpr.cE, kRb[i]))).transpose().reshape(K, 2, 1)
+                        self.stfs.vsigma(eps2, self.prpr.ce_2, self.prpr.ce_0, self.prpr.ce_1, self.prpr.ce1, self.prpr.ce0, self.prpr.ce2, self.prpr.cS_1, self.prpr.cS1, self.prpr.cRc*kRb, self.prpr.cRt, self.prpr.cE, kRb))).transpose().reshape(K, 2, 1)
         vb = self.v_b(K, Sb, eps1, eps2)
         Sxyb = self.sxyb(K, orientation, Sb)
         return vb, Sb, Sxyb, orientation, eps1, eps2
@@ -335,7 +335,7 @@ class Start:
     def strt(self, time, lst2, stg2, gb3, iF):
         start = time.time()
         self.prpr = self.prop.Properties()
-        self.report = open(os.path.join(self.prop.dpath, self.repname), 'w')
+        self.report = open(os.path.join(self.prop.rpath, self.repname), 'w')
         Stiffness.v = self.v
         print('Program =RC_slab.v1.0= designed by G. Berezin in 2020')
         print('Program =RC_slab.v1.0= designed by G. Berezin in 2020',
@@ -364,18 +364,18 @@ class Start:
             print(self.resname)
         else:
             if os.path.exists(os.path.join(
-                    self.prop.dpath, 'cracks.csv')):
+                    self.prop.rpath, 'cracks.csv')):
                 os.remove(os.path.join(
-                    self.prop.dpath, 'cracks.csv'))
+                    self.prop.rpath, 'cracks.csv'))
             sls = self.fsc.Second(self.prpr, self.lds, cnvr,
-                                  itr, itr_b, clc, rsl, stfs, iF, self.dat_file)
+                                  itr, itr_b, clc, rsl, stfs, iF, self.dat_file, self.fname)
             sls.calc(self.report)
             result3 = pd.DataFrame(sls.crc.rescrack, columns=['crc', 'Abt,cm^2', 'As,cm^2', 'ds,mm', 'ls,m', 'Phi1',
                                                               'Phi2', 'Phi3', 'Psi,s', 'Sscrc,MPa', 'Ss,MPa', 'Es,MPa', 'acrc,mm'])
             result3.to_csv(os.path.join(
-                self.prpr.dpath, 'cracks.csv'), sep=';', index=False)
+                self.prpr.rpath, 'cracks.csv'), sep=';', index=False)
             print('res2.csv')
-            if os.path.exists(os.path.join(self.prop.dpath, 'cracks.csv')):
+            if os.path.exists(os.path.join(self.prop.rpath, 'cracks.csv')):
                 print('cracks.csv')
         jt = round((time.time() - start), 4)
         print("Job time:", jt, "seconds")

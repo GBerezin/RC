@@ -148,8 +148,7 @@ class Result:
     def rslt1(self, itr):
         res1 = np.hstack((self.grade.reshape(self.stfs.n, 1), self.stfs.x.reshape(self.stfs.n, 1),
                           self.stfs.y.reshape(self.stfs.n, 1), itr.eps.reshape(self.stfs.n, 1), itr.Sig.reshape(self.stfs.n, 1), self.stfs.A.reshape(self.stfs.n, 1)))
-        self.result1 = pd.DataFrame(
-            res1, columns=['Grade', 'Zx', 'Zy', 'Strain', 'Stress', 'Area'])
+        self.result1 = pd.DataFrame(res1, columns=['Grade', 'Zx', 'Zy', 'Strain', 'Stress', 'Area'])
 
 
 class Interaction:
@@ -162,10 +161,8 @@ class Interaction:
         epsb2 = -0.0035
         Zbx = self.prpr.concr['Zx']
         Zby = self.prpr.concr['Zy']
-        #Zb = np.transpose(np.array([Zbx, Zby, np.ones(len(Zbx))]))
         Zsx = self.prpr.steel['Zx']
         Zsy = self.prpr.steel['Zy']
-        #Zs = np.transpose(np.array([Zsx, Zsy, np.ones(len(Zsx))]))
         Zx = self.prpr.pr['Zx']
         Zy = self.prpr.pr['Zy']
         Z = np.transpose(np.array([Zx, Zy, np.ones(len(Zx))]))
@@ -211,7 +208,7 @@ class Start:
         self.fname = fname
         self.repname = fname+'.txt'
         self.resname = fname+'.csv'
-        self.report = open(os.path.join(self.prop.dpath, self.repname), 'w')
+        self.report = open(os.path.join(self.prop.rpath, self.repname), 'w')
 
     def strt(self, time, lst2, stg2, gb3, iF):
         start = time.time()
@@ -243,18 +240,18 @@ class Start:
             print(self.resname)
         else:
             if os.path.exists(os.path.join(
-                    self.prop.dpath, 'cracks.csv')):
+                    self.prop.rpath, 'cracks.csv')):
                 os.remove(os.path.join(
-                    self.prop.dpath, 'cracks.csv'))
+                    self.prop.rpath, 'cracks.csv'))
             sls = self.fsc.Second(self.prpr, self.lds, cnvr,
-                                  itr, itr_b, clc, rsl, stfs, iF, self.dat_file)
+                                  itr, itr_b, clc, rsl, stfs, iF, self.dat_file, self.fname)
             sls.calc(self.report)
             result3 = pd.DataFrame(sls.crc.rescrack, columns=['crc', 'Abt,cm^2', 'As,cm^2', 'ds,mm', 'ls,m', 'Phi1',
                                                               'Phi2', 'Phi3', 'Psi,s', 'Sscrc,MPa', 'Ss,MPa', 'Es,MPa', 'acrc,mm'])
             result3.to_csv(os.path.join(
-                self.prpr.dpath, 'cracks.csv'), sep=';', index=False)
+                self.prpr.rpath, 'cracks.csv'), sep=';', index=False)
             print('res2.csv')
-            if os.path.exists(os.path.join(self.prop.dpath, 'cracks.csv')):
+            if os.path.exists(os.path.join(self.prop.rpath, 'cracks.csv')):
                 print('cracks.csv')
         jt = round((time.time() - start), 4)
         print("Job time:", jt, "seconds")

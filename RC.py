@@ -24,6 +24,7 @@ class RC(QWidget):
     def initUI(self):
         self.dpath = prop.dpath
         self.tpath = prop.tpath
+        self.rpath = prop.rpath
         self.fnd = 'fdata'
         self.dat_file = os.path.join(self.tpath, self.fnd + '.csv')
         self.fnl = 'floads'
@@ -309,8 +310,7 @@ class RC(QWidget):
             import fclasses
             os.system('cls')
             self.fc = fclasses.Start(fsc, prop, self.load, self.dat_file, self.fname)
-            self.stfs, self.prpr, self.rsl = self.fc.strt(
-                time, lst2, stg2, gb3, self.iF)
+            self.stfs, self.prpr, self.rsl = self.fc.strt(time, lst2, stg2, gb3, self.iF)
             self.button4.setVisible(True)
         else:
             import sclasses
@@ -328,8 +328,8 @@ class RC(QWidget):
         elif sender.text() == 'View report':
             os.system('cls')
             repname = self.fname + '.txt'
-            if os.path.exists(os.path.join(self.dpath, repname)):
-                f = open(os.path.join(self.dpath, repname), 'r')
+            if os.path.exists(os.path.join(self.rpath, repname)):
+                f = open(os.path.join(self.rpath, repname), 'r')
                 print(f.read())
                 f.close()
             else:
@@ -346,7 +346,7 @@ class RC(QWidget):
 
     def about(self):
         self.msgBox.setIcon(self.msgBox.Information)
-        self.msgBox.setText('Program =RC_v1.0= designed by G. Berezin in 2020')
+        self.msgBox.setText('Program =RC_v1.1= designed by G. Berezin in 2023')
         self.msgBox.setWindowTitle("About program")
         self.msgBox.setStandardButtons(self.msgBox.Ok)
         self.msgBox.exec()
@@ -372,7 +372,6 @@ class RC(QWidget):
 
     def text(self):
         self.sender().text()
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

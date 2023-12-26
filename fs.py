@@ -21,11 +21,11 @@ class Start:
         self.prpr.prp(dat_file)
         self.prpr.chgprop()
         if m == 'frame':
-            print('Program =RC_frame.v1.0= designed by G. Berezin in 2020')
+            print('Program =RC_frame.v1.1= designed by G. Berezin in 2023')
             clss = fclasses
             u_stg1 = np.zeros(3)
         else:
-            print('Program =RC_slab.v1.0= designed by G. Berezin in 2020')
+            print('Program =RC_slab.v1.1= designed by G. Berezin in 2023')
             clss = sclasses
             u_stg1 = np.zeros(6)
         stfs = clss.Stiffness(self.prpr)

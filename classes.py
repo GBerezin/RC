@@ -31,7 +31,7 @@ class First:
             self.rsl.rslt1(self.itr)
             if self.itr.resmes != 'Convergence did not reached !':
                 self.rsl.result1.to_csv(os.path.join(
-                    self.prpr.dpath, self.resname), sep=';', index=False)
+                    self.prpr.rpath, self.resname), sep=';', index=False)
                 print(self.rsl.result1, file=report)
             print(self.itr.resmes, file=report)
             self.cnvr.converg(self.Fg, self.itr)
@@ -51,7 +51,7 @@ class Second(First):
         print('Solution:', self.clc.mes, file=report)
         print(self.rsl.result1, file=report)
         self.rsl.result1.to_csv(os.path.join(
-            self.prpr.dpath, 'res2.csv'), sep=';', index=False)
+            self.prpr.rpath, 'res2.csv'), sep=';', index=False)
         print(self.itr.resmes, file=report)
         print(self.cnvr.cvrg, file=report)
         if self.crc.Sscrc != 0.0:
