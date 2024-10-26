@@ -191,7 +191,7 @@ class Interaction:
                     u = np.array(([i, j, k+e0x+e0y]))
                     eps = Z.dot(u)
                     Sig = self.stfs.vsigma(eps, self.prpr.e_2, self.prpr.e_0, self.prpr.e_1, self.prpr.e1, self.prpr.e0,
-                                           self.prpr.e2, self.prpr.S_1, self.prpr.S1, self.prpr.Rc, self.prpr.Rt, self.prpr.E)
+                                           self.prpr.e2, self.prpr.S_1, self.prpr.S1, self.prpr.Rc, self.prpr.Rt, self.prpr.E, 1)
                     Ff = np.array((sum(Sig*self.stfs.x*self.stfs.A),
                                    sum(Sig*self.stfs.y * self.stfs.A), sum(Sig*self.stfs.A)))
                     Fi = np.append(Fi, Ff)
